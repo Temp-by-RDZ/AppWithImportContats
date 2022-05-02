@@ -45,10 +45,10 @@ class WindowContacts : Fragment() {
 
 	private fun explain(){
 		AlertDialog.Builder(requireContext())
-			.setTitle("Доступ к контактам")
-			.setMessage("Для отображение списка контактов нужен доступ к списку контактов")
-			.setPositiveButton("Предоставить доступ") { _, _ -> permissionGranted() }
-			.setNegativeButton("Не надо") { dialog, _ -> dialog.dismiss(); permissionForbidden(); }
+			.setTitle(getString(R.string.t_permission_title))
+			.setMessage(getString(R.string.t_permission_explain))
+			.setPositiveButton(getString(R.string.t_permission_yes)) { _, _ -> permissionGranted() }
+			.setNegativeButton(getString(R.string.t_permission_no)) { dialog, _ -> dialog.dismiss(); permissionForbidden(); }
 			.create()
 			.show()
 	}
@@ -67,7 +67,7 @@ class WindowContacts : Fragment() {
 				if(permissions[i]==Manifest.permission.READ_CONTACTS&&grantResults[i]==PackageManager.PERMISSION_GRANTED){
 					getContacts()
 				}else{
-					explain()
+					permissionForbidden()
 				}
 			}
 		}
@@ -75,7 +75,7 @@ class WindowContacts : Fragment() {
 	}
 
 	private fun getContacts() {
-		//TODO("Not yet implemented")
+		binding.subTitle.text = getString(R.string.t_subtitle)
 	}
 	
 	companion object {

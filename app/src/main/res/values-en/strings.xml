@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Contacts</string>
+    <string name="b_button">Open Contacts</string>
+    <string name="t_permission_title">Access to Contacts</string>
+    <string name="t_permission_explain">For showing Contact list, application require access to your Contacts.</string>
+    <string name="t_permission_yes">Give permission</string>
+    <string name="t_permission_no">Deny</string>
+    <string name="waiting">Waiting for permission</string>
+    <string name="t_subtitle">Your Contacts:</string>
+</resources>
