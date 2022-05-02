@@ -1,12 +1,15 @@
 package com.trdz.tasks
 
 import android.Manifest
+import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.ContactsContract
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.trdz.tasks.databinding.FragmentWindowContactsBinding
@@ -76,6 +79,21 @@ class WindowContacts : Fragment() {
 
 	private fun getContacts() {
 		binding.subTitle.text = getString(R.string.t_subtitle)
+		val contentResolver: ContentResolver = requireContext().contentResolver
+
+		val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.Contacts.DISPLAY_NAME + " ASC")
+		cursor?.let {
+			for (i in 0 until it.count){
+				if(cursor.moveToPosition(i)){
+					val columnNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
+					val name:String = cursor.getString(columnNameIndex)
+					binding.containerForContacts.addView(TextView(requireContext(),null,0,R.style.contact).apply {
+						text= name
+					})
+				}
+			}
+			it.close()
+		}
 	}
 	
 	companion object {
