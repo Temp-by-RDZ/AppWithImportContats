@@ -8,4 +8,6 @@
     <string name="t_permission_no">Deny</string>
     <string name="waiting">Waiting for permission</string>
     <string name="t_subtitle">Your Contacts:</string>
+    <string name="t_start_call">Dzin-dzin</string>
+    <string name="t_message_deny">Permission Denied</string>
 </resources>

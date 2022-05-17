@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity(), Leader {
 		setContentView(R.layout.activity_main)
 
 		if (savedInstanceState == null) navigation.add(supportFragmentManager, WindowStart.newInstance(), false)
+
 	}
 
 }

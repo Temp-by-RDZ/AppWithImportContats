@@ -13,6 +13,10 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.trdz.tasks.databinding.FragmentWindowContactsBinding
+import android.R.id
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 
 class WindowContacts : Fragment() {
 
@@ -61,41 +65,77 @@ class WindowContacts : Fragment() {
 	}
 
 	private fun permissionForbidden() {
+		executors.getExecutor().showToast(requireContext(),getString(R.string.t_message_deny), Toast.LENGTH_SHORT)
 		requireActivity().supportFragmentManager.popBackStack()
 	}
 
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-		if(requestCode==REQUEST_CODE){
-			for(i in permissions.indices){
-				if(permissions[i]==Manifest.permission.READ_CONTACTS&&grantResults[i]==PackageManager.PERMISSION_GRANTED){
-					getContacts()
-				}else{
-					permissionForbidden()
-				}
+		if (requestCode == REQUEST_CODE) {
+			if (grantResults[0] == PackageManager.PERMISSION_GRANTED) getContacts()
+			else permissionForbidden()
+			}
+		else if (requestCode == REQUEST_CALL) {
+			if (grantResults[0] == PackageManager.PERMISSION_GRANTED) makeCall()
 			}
 		}
-		else{ super.onRequestPermissionsResult(requestCode, permissions, grantResults) }
-	}
 
 	private fun getContacts() {
 		binding.subTitle.text = getString(R.string.t_subtitle)
 		val contentResolver: ContentResolver = requireContext().contentResolver
-
-		val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null, null, ContactsContract.Contacts.DISPLAY_NAME + " ASC")
+		val cursor = contentResolver.query(ContactsContract.Contacts.CONTENT_URI, null, null,null, ContactsContract.Contacts.DISPLAY_NAME + " ASC")
 		cursor?.let {
 			for (i in 0 until it.count){
 				if(cursor.moveToPosition(i)){
 					val columnNameIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME)
 					val name:String = cursor.getString(columnNameIndex)
-					binding.containerForContacts.addView(TextView(requireContext(),null,0,R.style.contact).apply {
-						text= name
-					})
+					val contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID))
+					val number = getNumberFromID(contentResolver,contactId)
+					addView(name, number)
 				}
 			}
 			it.close()
 		}
 	}
-	
+
+	private fun getNumberFromID(cr: ContentResolver, contactId: String) :String {
+		val phones = cr.query(
+			ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+			ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null
+		)
+		var number = "0"
+		phones?.let { cursor ->
+			while (cursor.moveToNext()) {
+				number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
+			}
+		}
+		return number
+	}
+
+	private fun addView(name:String, number:String) {
+		binding.containerForContacts.addView(TextView(requireContext(),null,0,R.style.contact).apply {
+			text= "$name: $number"
+			setOnClickListener {
+				executors.getExecutor().showToast(context,context.getString(R.string.t_start_call), Toast.LENGTH_SHORT)
+				numberCurrent =  number
+				makeCall()
+			}
+		})
+	}
+
+	private var numberCurrent: String = "none"
+
+	private fun makeCall() {
+		if(ContextCompat.checkSelfPermission(
+				requireContext(),
+				Manifest.permission.CALL_PHONE
+			) == PackageManager.PERMISSION_GRANTED){
+			val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$numberCurrent"))
+			startActivity(intent)
+		}else{
+			requestPermissions(arrayOf(Manifest.permission.CALL_PHONE), REQUEST_CALL)
+		}
+	}
+
 	companion object {
 		@JvmStatic
 		fun newInstance() = WindowContacts()
